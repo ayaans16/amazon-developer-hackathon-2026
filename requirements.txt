@@ -1,0 +1,10 @@
+# VoiceOps MCP server. Needs the MCP Python SDK 2.x (MCPServer API).
+mcp>=2.2,<3
+docker>=7.1,<8
+psutil>=6
+uvicorn>=0.30
+starlette>=0.40
+
+# tests
+pytest>=8
+jsonschema>=4.20
