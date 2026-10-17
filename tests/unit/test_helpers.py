@@ -9,17 +9,26 @@ from server.docker_client import info_from_inspect, parse_docker_time
 from server.redact import clean_text, redact
 
 
+# Fixtures are assembled at runtime so secret scanners (GitGuardian etc.) don't
+# flag credential-shaped literals in the repo. None of these are real.
+_FAKE_PG_PASS = "not" + "-a-" + "pass"
+_FAKE_AWS_SECRET = "FAKE" + "x" * 36
+_FAKE_AWS_ID = "AKIA" + "TESTONLY" + "0" * 8
+_FAKE_GH_TOKEN = "ghp" + "_" + "t" * 36
+_FAKE_JWT = ".".join(["eyJ" + "hbGciOiJub25lIn0", "eyJ" + "zdWIiOiJ0ZXN0In0", "c2lnbmF0dXJl"])
+
+
 @pytest.mark.parametrize(
     "line,secret",
     [
-        ("DATABASE_URL=postgres://app:hunter2@db:5432/prod", "hunter2"),
+        (f"DATABASE_URL=postgres://app:{_FAKE_PG_PASS}@db:5432/prod", _FAKE_PG_PASS),
         ("password=correcthorse", "correcthorse"),
         ('{"api_key": "abc123def456"}', "abc123def456"),
-        ("AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG", "wJalrXUtnFEMI"),
+        (f"AWS_SECRET_ACCESS_KEY={_FAKE_AWS_SECRET}", _FAKE_AWS_SECRET),
         ("Authorization: Bearer abcdef1234567890", "abcdef1234567890"),
-        ("key AKIAIOSFODNN7EXAMPLE leaked", "AKIAIOSFODNN7EXAMPLE"),
-        ("ghp_abcdefghijklmnopqrstuvwxyz0123456789", "abcdefghijklmnopqrstuvwxyz"),
-        ("jwt eyJhbGciOiJIUzI1.eyJzdWIiOiIxMjM0.SflKxwRJSMeKKF2QT4fw", "eyJhbGci"),
+        (f"key {_FAKE_AWS_ID} leaked", _FAKE_AWS_ID),
+        (_FAKE_GH_TOKEN, _FAKE_GH_TOKEN[4:]),
+        (f"jwt {_FAKE_JWT}", _FAKE_JWT[:8]),
     ],
 )
 def test_redacts_secrets(line, secret):
