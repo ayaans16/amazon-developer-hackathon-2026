@@ -100,7 +100,7 @@
             "type": "string",
             "enum": ["all", "running", "not_running", "unhealthy"],
             "default": "all",
-            "description": "Narrow the list. 'not_running' covers exited, dead, created and restarting containers."
+            "description": "Narrow the list. 'not_running' is every container that isn't running (exited, dead, created, paused, restarting)."
           }
         }
       },
@@ -117,7 +117,11 @@
                 "items": { "$ref": "#/$defs/container_summary" },
                 "maxItems": 200
               },
-              "total": { "type": "integer", "minimum": 0 },
+              "total": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Total containers on the host, before state_filter is applied."
+              },
               "summary": { "$ref": "#/$defs/summary" }
             }
           },
